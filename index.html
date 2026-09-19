@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Я Долгожитель — Иван Везденецкий</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --neon-green: #00ff9d;
+            --neon-blue: #00f0ff;
+            --glass-bg: rgba(10, 10, 10, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-color: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        #bio-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Тонкие закладки сбоку */
+        .nav-side {
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            width: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+            padding: 20px 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            border-left: 1px solid var(--glass-border);
+            overflow: visible; /* Изменили auto на visible, чтобы подсказки не обрезались */
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            height: 24px;
+            padding-right: 15px;
+            text-decoration: none;
+            color: #666;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            border-right: 3px solid transparent;
+            transition: all 0.3s ease;
+            margin-left: auto;
+            flex-shrink: 0;
+            cursor: pointer;
+            position: relative;
+            z-index: 102; /* Поверх панели */
+        }
+
+        .nav-link:hover {
+            color: var(--neon-blue);
+            border-right-color: var(--neon-blue);
+            padding-right: 20px;
+        }
+
+        .nav-link.active {
+            color: var(--neon-green);
+            border-right-color: var(--neon-green);
+            text-shadow: 0 0 8px var(--neon-green);
+            padding-right: 20px;
+        }
+
+        /* Светящаяся подсказка (теперь реализована через span для надежности) */
+        .nav-tooltip {
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%) translateX(10px); /* Начинает появляться справа */
+            margin-right: 15px;
+            white-space: nowrap;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--neon-blue);
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--neon-blue);
+            padding: 5px 12px;
+            border-radius: 4px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            z-index: 200; /* Максимально поверх всего */
+        }
+
+        .nav-link:hover .nav-tooltip {
+            opacity: 1;
+            transform: translateY(-50%) translateX(0); /* Плавно выезжает */
+        }
+
+        .content {
+            padding-right: 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 60px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            width: 100%;
+            max-width: 1400px;
+            position: relative;
+        }
+
+        h1, h2, h3 {
+            text-transform: uppercase;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-weight: 900;
+            font-size: 3em;
+            text-shadow: 2px 2px 0px var(--neon-green);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-weight: 700;
+            font-size: 2.2em;
+            border-left: 5px solid var(--neon-green);
+            padding-left: 25px;
+            margin-bottom: 40px;
+            color: var(--neon-blue);
+        }
+
+        p, li {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; color: #888; font-size: 1rem; letter-spacing: 1px; text-transform: uppercase; }
+        
+        .accent-green { color: var(--neon-green); font-weight: 700; }
+        .accent-blue { color: var(--neon-blue); font-weight: 700; }
+
+        .badge {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+
+        ul { list-style: none; padding: 0; }
+        ul li { padding-left: 30px; position: relative; }
+        ul li::before {
+            content: ">";
+            position: absolute;
+            left: 0;
+            top: 2px;
+            color: var(--neon-green);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px; }
+        .text-center { text-align: center; }
+
+        .title-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .title-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 25px rgba(0, 255, 157, 0.2);
+            filter: contrast(1.1);
+        }
+
+        @media (max-width: 900px) {
+            .title-grid { grid-template-columns: 1fr; }
+            .title-image { max-width: 400px; margin: 0 auto; }
+        }
+
+        .bio-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 300px;
+            height: 300px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .blood-cell {
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle at 35% 35%, var(--neon-blue), transparent 70%);
+            border: 2px solid rgba(0, 240, 255, 0.5);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
+            animation: cellPulse 3s infinite ease-in-out;
+        }
+        @keyframes cellPulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; border-radius: 50%; }
+            50% { transform: scale(1.2); opacity: 1; border-radius: 45%; }
+        }
+
+        .dividing-cell {
+            width: 100px;
+            height: 100px;
+            border: 3px solid var(--neon-green);
+            border-radius: 50%;
+            box-shadow: 0 0 40px var(--neon-green);
+            animation: divide 4s infinite ease-in-out;
+        }
+        @keyframes divide {
+            0%, 100% { width: 100px; margin-left: 0px; box-shadow: 0 0 20px var(--neon-green); }
+            50% { width: 150px; margin-left: 25px; border-radius: 40%; background: rgba(0, 255, 157, 0.1); }
+            75% { width: 100px; margin-left: 50px; }
+        }
+
+        .ring {
+            position: absolute;
+            border: 2px dashed transparent;
+            border-radius: 50%;
+            animation: spin 10s infinite linear;
+        }
+        .ring:nth-child(1) { width: 250px; height: 250px; border-top-color: var(--neon-blue); border-bottom-color: var(--neon-blue); animation-duration: 8s; }
+        .ring:nth-child(2) { width: 180px; height: 180px; border-left-color: var(--neon-green); border-right-color: var(--neon-green); animation-duration: 12s; animation-direction: reverse; }
+        .ring:nth-child(3) { width: 100px; height: 100px; border-top-color: var(--neon-blue); border-bottom-color: var(--neon-green); animation-duration: 5s; }
+        
+        .core {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 30px white, 0 0 60px var(--neon-green);
+            animation: corePulse 2s infinite alternate;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes corePulse { 0% { transform: scale(1); } 100% { transform: scale(1.5); opacity: 0.8; } }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="bio-bg"></canvas>
+
+    <!-- Боковые закладки со встроенными подсказками (span) -->
+    <nav class="nav-side">
+        <a href="#s1" class="nav-link" data-target="s1">1<span class="nav-tooltip">Титульный слайд</span></a>
+        <a href="#s2" class="nav-link" data-target="s2">2<span class="nav-tooltip">1. Истоки: Желтый Император</span></a>
+        <a href="#s3" class="nav-link" data-target="s3">3<span class="nav-tooltip">1.1 Энергетические каналы и Аура</span></a>
+        <a href="#s4" class="nav-link" data-target="s4">4<span class="nav-tooltip">2. Анатомия многомерного тела</span></a>
+        <a href="#s5" class="nav-link" data-target="s5">5<span class="nav-tooltip">2.1 Как спускается болезнь</span></a>
+        <a href="#s6" class="nav-link" data-target="s6">6<span class="nav-tooltip">3. Секреты Китайской Медицины</span></a>
+        <a href="#s7" class="nav-link" data-target="s7">7<span class="nav-tooltip">3.1 Уровни восстановления</span></a>
+        <a href="#s8" class="nav-link" data-target="s8">8<span class="nav-tooltip">4. Эликсиры и БАДы</span></a>
+        <a href="#s9" class="nav-link" data-target="s9">9<span class="nav-tooltip">4.1 Исцеление клеток</span></a>
+        <a href="#s10" class="nav-link" data-target="s10">10<span class="nav-tooltip">5. Протоколы от хронических заболеваний</span></a>
+        <a href="#s11" class="nav-link" data-target="s11">11<span class="nav-tooltip">5.1 Интеграция методик</span></a>
+        <a href="#s12" class="nav-link" data-target="s12">12<span class="nav-tooltip">6. БИОЭНЕРГОМАССАЖЁР</span></a>
+        <a href="#s13" class="nav-link" data-target="s13">13<span class="nav-tooltip">6.1 Аппараты: РЭМ и ТИМ</span></a>
+        <a href="#s14" class="nav-link" data-target="s14">14<span class="nav-tooltip">7. Аппаратная Диагностика</span></a>
+        <a href="#s15" class="nav-link" data-target="s15">15<span class="nav-tooltip">7.1 Состав тела и Биовозраст</span></a>
+        <a href="#s16" class="nav-link" data-target="s16">16<span class="nav-tooltip">8. Движение: Физический план</span></a>
+        <a href="#s17" class="nav-link" data-target="s17">17<span class="nav-tooltip">8.1 Движение: Духовный план</span></a>
+        <a href="#s18" class="nav-link" data-target="s18">18<span class="nav-tooltip">9. Паспорт Здоровья</span></a>
+        <a href="#s19" class="nav-link" data-target="s19">19<span class="nav-tooltip">9.1 Структура Программы</span></a>
+        <a href="#s20" class="nav-link" data-target="s20">20<span class="nav-tooltip">10. Составление питания</span></a>
+        <a href="#s21" class="nav-link" data-target="s21">21<span class="nav-tooltip">10.1 Этапы очищения</span></a>
+        <a href="#s22" class="nav-link" data-target="s22">22<span class="nav-tooltip">11. Отслеживание динамики</span></a>
+        <a href="#s23" class="nav-link" data-target="s23">23<span class="nav-tooltip">11.1 Марафон «Весь мир за 5 лет»</span></a>
+        <a href="#s24" class="nav-link" data-target="s24">24<span class="nav-tooltip">Корпорация Здоровья</span></a>
+        <a href="#s25" class="nav-link" data-target="s25">25<span class="nav-tooltip">Шесть Канонов Долголетия</span></a>
+    </nav>
+
+    <div class="content">
+        
+        <!-- 1: Титул с фото -->
+        <section id="s1">
+            <div class="glass-panel" style="border-left-color: var(--neon-green);">
+                <div class="title-grid">
+                    <div class="title-text">
+                        <div class="badge">Корпорация Здоровья и Долголетия · 2026–2031</div>
+                        <h1>Я — Долгожитель</h1>
+                        <p style="font-size: 1.4em; color: #fff;">Программа для приглашённых на прохождение курса. Синергия древних практик и биотехнологий.</p>
+                        <br>
+                        <p style="font-size: 1.5em; color: #fff;">Автор и ведущий: <span class="accent-green">Иван Везденецкий</span></p>
+                        <p class="mono">vezde-iv.ru · vezde-iv@mail.ru · «Трудно только начать»</p>
+                    </div>
+                    <div class="title-image">
+                        <img src="https://z-cdn-media.chatglm.cn/files/3a8f3ffa-283e-4528-9133-14f61738ce7f.jpg?auth_key=1889798742-7e4f7168c4ac453c8ce86947045be520-0-9db264db55f81b07ff44204c306eeb64" alt="Иван Везденецкий">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2: Желтый Император -->
+        <section id="s2">
+            <div class="glass-panel">
+                <h2>1. Истоки: Желтый Император</h2>
+                <p>4500 лет назад император Хуан-ди заложил основы китайской народной медицины в трактате «Хуанди Нэйцзин». Он описал систему, опередившую время на тысячелетия.</p>
+                <p>Древние врачи поняли: тело пронизано невидимыми путями. Если этот путь забит — орган гибнет. Медицина Запада пытается лечить сам орган, медицина Востока — очищает путь, по которому к органу поступает жизнь.</p>
+                <p class="mono">Главный постулат: управление энергией — это управление жизнью. Мы не лечим болезни, мы восстанавливаем течение Ци.</p>
+            </div>
+        </section>
+
+        <!-- 3: Меридианы и Аура -->
+        <section id="s3">
+            <div class="glass-panel">
+                <h2>1.1 Энергетические каналы и Аура</h2>
+                <ul>
+                    <li><span class="accent-blue">Меридианы (Цзин-Ло):</span> Это невидимая vascular сеть, по которой циркулирует жизненная энергия «Ци» и кровь. Если меридиан пережат спазмом, орган, который он питает, начинает голодать.</li>
+                    <li><span class="accent-blue">Аура (Защитное Ци / Вэй-Ци):</span> Энергетический панцирь вокруг тела. Это наш иммунитет на энергетическом уровне, защищающий от вирусов, стресса и холода.</li>
+                </ul>
+                <br>
+                <p>В китайской народной медицине нет понятия «болезнь». Есть «застой Ци» или «дефицит Ци». Наша задача — очистить русла, убрать спазмы и запустить ток крови и энергии. Тогда организм исцелит сам себя.</p>
+            </div>
+        </section>
+
+        <!-- 4: Многомерное тело 1 -->
+        <section id="s4">
+            <div class="glass-panel">
+                <h2>2. Анатомия многомерного тела</h2>
+                <p>Человек — это не только плоть. Мы многомерны. Чтобы достичь долголетия, программа работает со всеми планами существования:</p>
+                <ul>
+                    <li><span class="accent-green">Физический:</span> Кости, мышцы, органы, кровь. То, что можно потрогать и измерить на УЗИ.</li>
+                    <li><span class="accent-green">Энергетический:</span> Меридианы, чакры, биополе. Система снабжения клеток праной (Ци).</li>
+                    <li><span class="accent-green">Ментальный:</span> Мысли, страхи, обиды. Психосоматика — это реакция тела на наши убеждения.</li>
+                    <li><span class="accent-green">Информационный (Духовный):</span> Цель, воля, смысл жизни. Связь с высшим замыслом.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 5: Многомерное тело 2 -->
+        <section id="s5">
+            <div class="glass-panel">
+                <h2>2.1 Как спускается болезнь</h2>
+                <p>Любое заболевание начинается не на физическом уровне. Сначала возникает сбой.</p>
+                <p>Сначала на Ментальном плане появляется разрушительная эмоция (гнев, страх, обида). Эта эмоция создает искажение на Энергетическом плане — блокирует меридиан. Заблокированный меридиан перестает питать орган. И только через время, когда кровь перестает поступать к тканям, на Физическом плане появляется то, что врачи называют «диагноз».</p>
+                <p>Работая только с телом, мы боремся с симптомом. Программа «Я — Долгожитель» воздействует на все 4 плана одновременно: гимнастика и массажи — с физическим, эликсиры и аппараты — с энергетическим, Цигун и психосоматика — с ментальным.</p>
+            </div>
+        </section>
+
+        <!-- 6: Секреты ТКМ 1 -->
+        <section id="s6">
+            <div class="glass-panel">
+                <h2>3. Секреты Китайской народной медицины</h2>
+                <p>Эта система тысячелетиями держалась в тайне. Её коренное отличие от западной аллопатической медицины заключается в подходе:</p>
+                <ul>
+                    <li><span class="accent-blue">Нет названий болезней.</span> Есть только синдром «Би» (застой) и нарушение микроциркуляции крови.</li>
+                    <li><span class="accent-blue">Объект работы:</span> Клетка → Ткань → Орган → Система.</li>
+                </ul>
+                <br>
+                <p>Вместо того чтобы ставить диагноз «гипертония», восточный врач говорит: «Нарушение микроциркуляции в сосудах головы и шеи, застой Ци в печени». Если кровь не доходит до капилляров органа — орган отмирает. Здоровье — это чистые сосуды и свободный ток крови.</p>
+            </div>
+        </section>
+
+        <!-- 7: Секреты ТКМ 2 (С анимацией крови) -->
+        <section id="s7">
+            <div class="glass-panel">
+                <h2>3.1 Уровни восстановления</h2>
+                <p>Мы не лечим отдельный орган, мы работаем с уровнями организации тела. Если клетка здорова, ткань будет здорова. Если ткань здорова, орган будет работать как часы.</p>
+                <p>Китайская народная медицина говорит: не бывает больных органов, бывают клетки, задушенные токсинами и шлаками. Наша задача — дать клетке кислород, воду и питание, а также убрать спазм, который перекрыл ей дорогу. Тогда запускается процесс аутофагии — организм сам себя очищает и восстанавливает.</p>
+                
+                <div class="bio-visual">
+                    <div class="blood-cell"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8: Эликсиры 1 -->
+        <section id="s8">
+            <div class="glass-panel">
+                <h2>4. Эликсиры и БАДы</h2>
+                <p>Продукция китайской народной медицины (эликсиры, кордицепс, линчжи, аминокислоты) — это не химические таблетки для снятия симптома. Это концентрат энергии, «строительный материал» для клеток.</p>
+                <p>Эти препараты имеют 100% усвояемость, так как созданы из нативных природных компонентов по древним императорским рецептурам, адаптированным под современную экологию.</p>
+            </div>
+        </section>
+
+        <!-- 9: Эликсиры 2 (С анимацией деления клетки) -->
+        <section id="s9">
+            <div class="glass-panel">
+                <h2>4.1 Исцеление клеток</h2>
+                <p>Как именно они работают:</p>
+                <ul>
+                    <li><span class="accent-green">Доставка:</span> Обеспечивают транспорт кислорода и нутриентов прямо в митохондрии — энергетические станции клетки.</li>
+                    <li><span class="accent-green">Очищение:</span> Растворяют и выводят токсины, тяжелые металлы и холестериновые бляшки из мембран.</li>
+                    <li><span class="accent-green">Иммунитет:</span> Активируют макрофаги — клетки-киллеры, которые начинают активно уничтожать вирусы и мутировавшие (раковые) клетки.</li>
+                </ul>
+                <br>
+                <p>Это топливо для запуска программы самовосстановления ДНК. Мы не лечим болезнь, мы возвращаем клетке способность к регенерации.</p>
+
+                <div class="bio-visual">
+                    <div class="dividing-cell"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10: Протоколы 1 -->
+        <section id="s10">
+            <div class="glass-panel">
+                <h2>5. Протоколы от хронических заболеваний</h2>
+                <p>В программу включены пошаговые протоколы восстановления при самых тяжелых хронических состояниях: диабет 2 типа, гипертония, артрозы, остеохондроз, аутоиммунные процессы. В основе лежит продукция китайской народной медицины.</p>
+                <p>Протокол — это не абстрактный совет. Это жесткая, расписанная по часам инструкция на каждый день. Первая фаза — всегда очищение ЖКТ и печени. Вторая — восстановление сосудистой стенки. Третья — лимфодренаж и клеточное питание.</p>
+            </div>
+        </section>
+
+        <!-- 11: Протоколы 2 -->
+        <section id="s11">
+            <div class="glass-panel">
+                <h2>5.1 Интеграция методик</h2>
+                <p>Эликсиры и БАДы работают в синергии с массажами и процедурами. Если мы пьем эликсир, не убрав спазм сосудов, он просто не дойдет до органа.</p>
+                <p>Поэтому каждый протокол включает:</p>
+                <ul>
+                    <li>Лимфодренажные массажи для выведения застойной жидкости.</li>
+                    <li>Очищение кишечника для разблокировки воротной вены.</li>
+                    <li>Аппаратную проработку меридианов для открытия путей крови.</li>
+                </ul>
+                <br>
+                <p>Каждая процедура бьет в корень болезни, а не в её симптом.</p>
+            </div>
+        </section>
+
+        <!-- 12: Аппараты 1 -->
+        <section id="s12">
+            <div class="glass-panel">
+                <h2>6. Аппараты: БИОЭНЕРГОМАССАЖЁР</h2>
+                <p>Высокотехнологичная работа с меридианами. Современные аппараты заменили иголки, сделав процесс безопасным, безболезненным и проникающим на глубину до 10 см.</p>
+                <p><span class="accent-blue">БИОЭНЕРГОМАССАЖЁР</span> генерирует мощный поток отрицательных ионов и инфракрасное излучение. Он работает как крове- и лимфоразгоняющий насос.</p>
+                <p>Аппарат глубоко прогревает ткани, открывая заблокированные меридианы. За счет ионизации запускается клеточное дыхание, а отток лимфы вымывает скопившиеся в мышцах токсины и молочную кислоту.</p>
+            </div>
+        </section>
+
+        <!-- 13: Аппараты 2 -->
+        <section id="s13">
+            <div class="glass-panel">
+                <h2>6.1 Аппараты: РЭМ и ТИМ</h2>
+                <ul>
+                    <li><span class="accent-blue">РЭМ (Ревитализирующий Энергомассажёр):</span> Выполняет глубокий миофасциальный релиз. Разминает мышцы, снимает хронические спазмы, которые годами пережимали сосуды, и запускает тургор крови.</li>
+                    <li><span class="accent-blue">ТИМ (Термоинфракрасный массажёр):</span> Воздействует на паравертебральные зоны (вдоль позвоночника). Это стимулирует спинной мозг и нервные окончания, «перезагружая» нервную систему.</li>
+                </ul>
+                <br>
+                <p class="mono">Протоколы аппаратов: направленное движение от центра к периферии по линиям меридианов. Сначала разблокировка центра, затем сброс энергии к конечностям.</p>
+            </div>
+        </section>
+
+        <!-- 14: Диагностика 1 (С анимацией сканера) -->
+        <section id="s14">
+            <div class="glass-panel">
+                <h2>7. Аппаратная Диагностика</h2>
+                <p>Мы не угадываем на глаз. Мы измеряем. Перед началом программы проводится комплексная диагностика, которая выявляет истинную причину старения и нарушений.</p>
+                <ul>
+                    <li><span class="accent-green">Капилляроскоп:</span> Микроскопическое исследование капилляров. Мы видим качество микроциркуляции крови в реальном времени. Застои выявляются до того, как орган заболит.</li>
+                    <li><span class="accent-green">Аппарат Короткова (ГРВ):</span> Фиксирует свечение ауры (биополя). Показывает баланс энергии левое/правое полушарие, уровень стресса и дефицит энергии в конкретных органах.</li>
+                </ul>
+
+                <div class="bio-visual">
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                    <div class="core"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 15: Диагностика 2 -->
+        <section id="s15">
+            <div class="glass-panel">
+                <h2>7.1 Состав тела и Биовозраст</h2>
+                <ul>
+                    <li><span class="accent-green">Умные весы (Биоимпеданс):</span> Точный расчет процента жира, мышечной массы, воды и основного обмена. Показывают, из чего вы состоите на самом деле.</li>
+                    <li><span class="accent-green">АнгиоСкан-01М:</span> Прибор, измеряющий жесткость сосудов. Определяет истинный биологический возраст артерий, индекс отражения и насыщение крови кислородом.</li>
+                </ul>
+                <br>
+                <p>Что выявим: дефицит кислорода, спазм сосудов, истощение нервной системы, реальный возраст сосудов. Вы можете выглядеть на 40, но ваши сосуды — на 60.</p>
+            </div>
+        </section>
+
+        <!-- 16: Тренировки 1 -->
+        <section id="s16">
+            <div class="glass-panel">
+                <h2>8. Движение: Физический план</h2>
+                <p><span class="accent-blue">Суставная гимнастика для опорно-двигательного аппарата</span></p>
+                <p>Ежедневный комплекс для избавления от болей в суставах и позвоночнике. Суставы не имеют кровеносных сосудов, их питание происходит через синовиальную жидкость. Нет движения — нет питания, сустав сохнет и разрушается.</p>
+                <ul>
+                    <li>Возвращение подвижности и гибкости.</li>
+                    <li>Снятие мышечных блоков, которые пережимают нервы и сосуды.</li>
+                    <li>Создание мышечного корсета без осевой нагрузки на позвоночник.</li>
+                </ul>
+                <br>
+                <p>Сначала мы избавляем тело от боли на физическом уровне, чтобы энергия могла свободно течь.</p>
+            </div>
+        </section>
+
+        <!-- 17: Тренировки 2 -->
+        <section id="s17">
+            <div class="glass-panel">
+                <h2>8.1 Движение: Духовный план</h2>
+                <p><span class="accent-blue">Оздоровительные методики и практики Цигун</span></p>
+                <p>Гимнастика Цигун — это медитация в движении. Управление вниманием, дыханием и внутренней энергией. Это не просто махи руками, это сбор энергии из космоса и её распределение по меридианам.</p>
+                <ul>
+                    <li>Остановка внутреннего диалога и снятие психоэмоционального напряжения.</li>
+                    <li>Запуск энергии «Даньтянь» (центра силы) и наполнение почек жизненным теплом.</li>
+                    <li>Омоложение нервной системы через глубокую парасимпатическую активацию.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 18: Паспорт 1 -->
+        <section id="s18">
+            <div class="glass-panel">
+                <h2>9. Паспорт Здоровья и Долголетия</h2>
+                <p>Это ваш личный документ, который будет сопровождать вас 5 лет (2026–2031). Он фиксирует старт и все изменения. Программа «Я — Долгожитель» — это 15 модулей (72 академических часа).</p>
+                <ul>
+                    <li>Паспорт не является медицинской картой. Это инструмент осознанного самоконтроля.</li>
+                    <li>Отметки по 8 шагам: Дыхание, Вода, Движение, Питание, Психология, Очищение, Образование, Привычки.</li>
+                    <li>Фотофиксация «до» и «после», регулярный замер биовозраста.</li>
+                </ul>
+                <br>
+                <p class="mono">Главный вопрос паспорта: «Зачем мне двадцать дополнительных лет активной жизни?»</p>
+            </div>
+        </section>
+
+        <!-- 19: Паспорт 2 -->
+        <section id="s19">
+            <div class="glass-panel">
+                <h2>9.1 Структура Программы</h2>
+                <p>Программа разбита на годовые циклы. В первый год — глубокая поквартальная диагностика (весы, Ангиоскан, ГРВ, пробы Штанге и Генчи). Со второго по пятый год — ежегодный мониторинг поддержания результата.</p>
+                <p>Постоянная часть паспорта заполняется один раз. В него вносятся:
+                    <br>— Диагностика и антропометрия (совместно с куратором).
+                    <br>— Медицинские данные (по результатам обследований в клинике).
+                    <br>— Заключения куратора на точках 3, 6, 9 и 12 месяцев.
+                </p>
+                <p>По истечении 5 лет выдается вкладыш на следующие 5 лет. Программа не имеет срока окончания.</p>
+            </div>
+        </section>
+
+        <!-- 20: Питание 1 -->
+        <section id="s20">
+            <div class="glass-panel">
+                <h2>10. Составление питания</h2>
+                <p>Питание — это основа очищения и rebuilding (перестройки) тела. Мы строим переход к осознанному питанию с конечной целью — переход на сыроедение (растворение шлаков и очищение крови).</p>
+                <p>Еда — это не калории. Это информация и энергия для обновления ДНК. Если есть мертвую, вареную пищу — организм тратит всю энергию на ее переваривание, вместо того чтобы тратить ее на исцеление.</p>
+            </div>
+        </section>
+
+        <!-- 21: Питание 2 -->
+        <section id="s21">
+            <div class="glass-panel">
+                <h2>10.1 Этапы очищения</h2>
+                <ul>
+                    <li><span class="accent-green">Очищение ЖКТ:</span> Устранение гнилостных процессов в кишечнике, выведение каловых камней и паразитов.</li>
+                    <li><span class="accent-green">Разгрузочные дни:</span> По Полю Брэггу (1, 3, 7, 10 дней). Это запускает процесс аутофагии — клетки начинают поедать внутриклеточный мусор и бактерии.</li>
+                    <li><span class="accent-green">Сыроедение:</span> Переход на живую растительную пищу, богатую ферментами. Пища, которая переваривает сама себя.</li>
+                </ul>
+                <br>
+                <p>Все практики очищения, голодания и изменения рациона проводятся строго под контролем куратора и с согласования с лечащим врачом.</p>
+            </div>
+        </section>
+
+        <!-- 22: Динамика 1 -->
+        <section id="s22">
+            <div class="glass-panel">
+                <h2>11. Отслеживание динамики</h2>
+                <p>Без системы контроля изменения — это просто разговоры. В рамках программы ведется строгий мониторинг.</p>
+                <p>В первый год (2026–2027) — глубокая проверка каждые 3 месяца. Мы замеряем:
+                    <br>— Состав тела по умным весам.
+                    <br>— Биологический возраст и жесткость сосудов на Ангиоскане.
+                    <br>— Энергию и уровень стресса по аппарату Короткова.
+                    <br>— Жизненную емкость легких (пробы Штанге и Генчи).
+                </p>
+            </div>
+        </section>
+
+        <!-- 23: Динамика 2 -->
+        <section id="s23">
+            <div class="glass-panel">
+                <h2>11.1 Марафон «Весь мир за 5 лет»</h2>
+                <p>С 2 по 5 год (2027–2031) — поддерживающий режим. Проводится один раз в год по ключевым показателям: вес, объем талии, биовозраст, артериальное давление, уровень энергии днем.</p>
+                <p>В динамике также участвует марафон «Весь мир за 5 лет». Он объединяет путешествия, корпоративные мероприятия и выездные интенсивы. Каждая поездка отмечается в паспорте, что создает мощный психосоматический эффект смены обстановки и получения новых впечатлений.</p>
+                <p>Мы будем видеть, как ваш биологический возраст снижается в сторону омоложения месяц за месяцем.</p>
+            </div>
+        </section>
+
+        <!-- 24: Итог 1 -->
+        <section id="s24">
+            <div class="glass-panel">
+                <h2>Корпорация Здоровья и Долголетия</h2>
+                <p>Программа «Я — Долгожитель» — это не курс. Это образ жизни. Образование и практики, которые вплетаются в вашу рутину.</p>
+                <p>Вы получаете куратора, который ведет вас на протяжении 5 лет. Вы получаете сообщество единомышленников, которые проходят этот путь вместе с вами.</p>
+                <p>Пропуск даже одного шага из 8 (Дыхание, Вода, Движение, Питание, Психология, Очищение, Образование, Привычки) обесценивает все остальные. Изменения возможны только при комплексном подходе.</p>
+            </div>
+        </section>
+
+        <!-- 25: Итог 2 (Каноны) -->
+        <section id="s25">
+            <div class="glass-panel" style="border-left-color: var(--neon-green);">
+                <h1 class="text-center">Шесть Канонов Долголетия</h1>
+                <div class="grid-2">
+                    <ul>
+                        <li>Общественно полезная цель в жизни</li>
+                        <li>Стремление к познанию себя и мира</li>
+                        <li>Глубокий сон, хороший пищевой и половой аппетиты</li>
+                    </ul>
+                    <ul>
+                        <li>Хорошая память и чувство справедливости</li>
+                        <li>Тренированное, гибкое, нежирное тело</li>
+                        <li>Нормальные показатели: давление, пульс, анализы</li>
+                    </ul>
+                </div>
+                <br><br>
+                <p style="font-size: 1.5em; text-align: center;">Автор программы: <span class="accent-green">Иван Везденецкий</span></p>
+                <p class="mono text-center">GLOBAL HEALTH CORPORATION · «Трудно только начать»</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Скрипт для плавного скролла (Lenis) -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.27/bundled/lenis.min.js"></script>
+    <script>
+        // Инициализация плавного скролла
+        const lenis = new Lenis({
+            duration: 1.5, 
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+            smoothWheel: true,
+            wheelMultiplier: 1,
+            smoothTouch: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // Логика подсветки активной закладки
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        lenis.on('scroll', (e) => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (e.scroll >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-target') === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Клик по закладкам
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('data-target');
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    lenis.scrollTo(targetEl, { offset: -20 });
+                }
+            });
+        });
+    </script>
+
+    <!-- Скрипт для анимированного фона (Нейроны/Сосуды) -->
+    <script>
+        const canvas = document.getElementById('bio-bg');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Класс для нейрона/узла
+        class Node {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.3; // Медленное дрейфование
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.radius = Math.random() * 1.5 + 0.5;
+                this.pulse = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+                this.pulse += 0.05; // Пульсация свечения
+            }
+            draw() {
+                ctx.beginPath();
+                let r = Math.max(0.1, this.radius + Math.sin(this.pulse) * 1);
+                ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = '#00ff9d';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#00ff9d';
+                ctx.fill();
+            }
+        }
+
+        // Создаем сеть узлов
+        const nodes = [];
+        const nodeCount = Math.floor((width * height) / 15000); // Плотность зависит от экрана
+        for (let i = 0; i < nodeCount; i++) {
+            nodes.push(new Node());
+        }
+
+        // Рисуем линии (связи между ближними узлами)
+        function drawConnections() {
+            ctx.shadowBlur = 0;
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    let dx = nodes[i].x - nodes[j].x;
+                    let dy = nodes[i].y - nodes[j].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 140) { // Если узлы близко, соединяем их
+                        ctx.beginPath();
+                        ctx.moveTo(nodes[i].x, nodes[i].y);
+                        ctx.lineTo(nodes[j].x, nodes[j].y);
+                        
+                        // Цвет линии меняется от зеленого к голубому
+                        let alpha = 1 - (dist / 140) * 0.8; // Чем дальше, тем прозрачнее
+                        ctx.strokeStyle = `rgba(0, 240, 255, ${alpha * 0.3})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Основной цикл анимации
+        function animateBg() {
+            ctx.clearRect(0, 0, width, height);
+            drawConnections();
+            nodes.forEach(n => { n.update(); n.draw(); });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+    </script>
+</body>
+</html>
